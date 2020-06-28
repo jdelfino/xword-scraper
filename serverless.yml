@@ -13,44 +13,26 @@ provider:
         - dynamodb:Scan
         - dynamodb:BatchWriteItem
       Resource: 'arn:aws:dynamodb:us-west-2:989024498168:table/xword'
+    - Effect: Allow
+      Action: # Gives permission to DynamoDB tables in a specific region
+        - SNS:Publish
+      Resource: 'arn:aws:sns:us-west-2:989024498168:scraper-failure'
+  environmentSecrets:
+    COOKIE: COOKIE
 
 plugins:
   - serverless-offline
   - serverless-dynamodb-local
-
-# you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
-
-# you can define service wide environment variables here
-environment:
-  COOKIE: foo
-
-# you can add packaging information here
-#package:
-#  include:
-#    - include-me.js
-#    - include-me-dir/**
-#  exclude:
-#    - exclude-me.js
-#    - exclude-me-dir/**
+  - serverless-secrets
 
 custom:
   dynamodb:
     stages:
       - dev
+      - production
+  serverlessSecrets:
+    providerOptions:
+      region: us-west-2
 
 functions:
   weekday:
@@ -81,15 +63,3 @@ resources: # CloudFormation template syntax
         ProvisionedThroughput:
           ReadCapacityUnits: 10
           WriteCapacityUnits: 10
-
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"
