@@ -5,6 +5,7 @@ const cheerio = require('cheerio');
 const AWS = require('aws-sdk');
 const moment = require ('moment');
 const dynamoclient = require('serverless-dynamodb-client');
+const secretsPromise = require('serverless-secrets/client');
 
 var dynamodb = dynamoclient.raw;
 const tableName = "xword";
@@ -23,62 +24,10 @@ function isInt(value) {
   !isNaN(parseInt(value, 10));
 }
 
-/*
-AWS.config.update({
-  region: "us-west-2",
-  endpoint: "http://localhost:8000",
-  accessKeyId: "fakeMyKeyId",
-  secretAccessKey: "fakeSecretAccessKey",
-  sslEnabled:     false,
-});
-
-var dynamodb = new AWS.DynamoDB();
-*/
-/*
-async function createTableIfNeeded(dclient) {
-  var params = {
-    TableName : tableName,
-    KeySchema: [
-      { AttributeName: "date", KeyType: "HASH"},  //Partition key
-      { AttributeName: "name", KeyType: "RANGE" }  //Sort key
-    ],
-    AttributeDefinitions: [
-      { AttributeName: "date", AttributeType: "S" },
-      { AttributeName: "name", AttributeType: "S" },
-    ],
-    ProvisionedThroughput: {
-      ReadCapacityUnits: 10,
-      WriteCapacityUnits: 10
-    }
-  };
-
-  return dclient.listTables({}).promise().then((data) => {
-    console.log(data.TableNames);
-    if (data.TableNames.indexOf(tableName) === -1) {
-      return dclient.createTable(params).promise();
-    }
-    return Promise.resolve();
-  }).then((data) => {
-    console.log("Created table", data);
-  });
-};
-
-async function deleteTableIfNeeded(dclient) {
-   return dclient.listTables({}).promise().then((data) => {
-    console.log(data.TableNames);
-    if (data.TableNames.indexOf(tableName) === -1) {
-      return Promise.resolve();
-    }
-    return dynamodb.deleteTable({TableName: tableName}).promise();
-  }).then((data) => {
-    console.log("Deleted table", data);
-  });
-}
-*/
-
 module.exports.scrape = async function(event, context, callback) {
   //await deleteTableIfNeeded(dynamodb);
   //await createTableIfNeeded(dynamodb);
+  await secretsPromise.load();
   await dynamodb.scan({TableName: tableName}).promise().then((data) => {
     console.log("scan result", JSON.stringify(data, null, 2));
   });
