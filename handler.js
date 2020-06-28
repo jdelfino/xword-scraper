@@ -10,14 +10,6 @@ const secretsPromise = require('serverless-secrets/client');
 var dynamodb = dynamoclient.raw;
 const tableName = "xword";
 
-const opts = {
-  credentials: 'include',
-  headers: {
-    //cookie: 'NYT-S:3wUynm3o7trhRn0GA9iI//U.oeETWQUIrPXi8cQXCbq67XS6LZ3sVzEYZit1RpmkKsjOoea6bgYnQZRe3IhyWEUWmjYP1rigAIpz4SYs6mdtAHBIBy9OLvz7c3Txvawp6LTL3qztduBxxtPUtTRRjj85wiHXOM2Q00aL6aUKSoWjyLuChU7YnT/mMKgY.A8Y3gniMIU4Cl3VIt6pClcHsdcwlUeiuEpOdHOigM186eeVDCzqMvLRHNpmXh8EYmNXrSLzgZpYPh/RZttyODRXA2Rr6AkHyGrsKL10NXcbB8eFs0'
-    cookie: 'NYT-S=3wUynm3o7trhRn0GA9iI//U.oeETWQUIrPXi8cQXCbq67XS6LZ3sVzEYZit1RpmkKsjOoea6bgYnQZRe3IhyWEUWmjYP1rigAIpz4SYs6mdtAHBIBy9OLvz7c3Txvawp6LTL3qztduBxxtPUtTRRjj85wiHXOM2Q00aL6aUKSoWjyLuChU7YnT/mMKgY.A8Y3gniMIU4Cl3VIt6pClcHsdcwlUeiuEpOdHOigM186eeVDCzqMvLRHNpmXh8EYmNXrSLzgZpYPh/RZttyODRXA2Rr6AkHyGrsKL10NXcbB8eFs0;'
-  }
-};
-
 function isInt(value) {
   return !isNaN(value) &&
   parseInt(Number(value)) == value &&
@@ -28,9 +20,13 @@ module.exports.scrape = async function(event, context, callback) {
   //await deleteTableIfNeeded(dynamodb);
   //await createTableIfNeeded(dynamodb);
   await secretsPromise.load();
-  await dynamodb.scan({TableName: tableName}).promise().then((data) => {
-    console.log("scan result", JSON.stringify(data, null, 2));
-  });
+
+  const opts = {
+    credentials: 'include',
+    headers: {
+      cookie: process.env.COOKIE
+    }
+  };
 
   const response = await fetch('https://www.nytimes.com/puzzles/leaderboards', opts);
   const body = await response.text();
@@ -46,7 +42,7 @@ module.exports.scrape = async function(event, context, callback) {
     const timeSecs = (60*parseInt(timeComponents[0], 10)) + parseInt(timeComponents[1]);
 
     if (!isInt(rank)) {
-      console.log("Not completed, skipping")
+      console.log(name, "not completed, skipping")
       return;
     }
     console.log(date, rank, name, timeSecs)
