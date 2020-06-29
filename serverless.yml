@@ -38,11 +38,11 @@ functions:
   weekday:
     handler: handler.scrape
     events:
-      - schedule: cron(55 02 ? * MON-FRI *)
+      - schedule: cron(55 01 ? * MON-FRI *)
   weekend:
     handler: handler.scrape
     events:
-      - schedule: cron(55 22 ? * SAT-SUN *)
+      - schedule: cron(55 21 ? * SAT-SUN *)
 
 resources: # CloudFormation template syntax
   Resources:
