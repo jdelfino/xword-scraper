@@ -22,6 +22,6 @@
     "serverless-babel-plugin": "^0.1.3",
     "serverless-dynamodb-local": "^0.2.39",
     "typescript": "^3.9.5",
-    "serverless-offline": "^6.4.0"
+    "serverless-offline": "^12.0.3"
   }
 }
